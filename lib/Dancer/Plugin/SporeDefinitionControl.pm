@@ -70,25 +70,14 @@ define spore validation to do on entered request
 
 =cut
 
-use Data::Dumper 'Dumper';
 register 'check_spore_definition' => sub {
     before sub {
         my $req = request;
         my %req_params = params;
-#print "Dumper \$req\n";
-#print Dumper $req->method();
         return unless (defined( $req->method() ) );
-#print "Dumper \$req\n";
-#print Dumper $req->route_pattern();
         return unless (defined( $req->route_pattern() ) );
-#print "Dumper \$req\n";
-#print Dumper $rh_path_validation->{$req->method()};
         return unless (defined( $rh_path_validation->{$req->method()} ) );
-#print "Dumper \$req\n";
-#print Dumper $rh_path_validation->{$req->method()}->{$req->route_pattern()};
         return unless (defined( $rh_path_validation->{$req->method()}->{$req->route_pattern()} ) );
-#print "Dumper \$req\n";
-#print Dumper $req;
         my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->route_pattern()}->{'required_params'};
         my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->route_pattern()}->{'optional_params'};
         # check if required params are present
@@ -97,11 +86,14 @@ register 'check_spore_definition' => sub {
           return halt(send_error("required params `$required_param' is not defined",
               400)) if (!defined params->{$required_param});
         }
+        my @list_total = ('format');
+        @list_total = (@list_total, @{$ra_required_params}) if defined($ra_required_params);
+        @list_total = (@list_total, @{$ra_optional_params}) if defined($ra_optional_params);
         # check for each params if they are specified in spore spec
         foreach my $param (keys %req_params)
         {
           return halt(send_error("parameter `$param' is unknow",
-              400)) if (!(grep {/^$param$/} @{$ra_required_params}) && !(grep {/^$param$/} @{$ra_optional_params}));
+              400)) if (!(grep {/^$param$/} @list_total));
         }
       };
 };
