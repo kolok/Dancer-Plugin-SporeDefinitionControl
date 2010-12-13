@@ -6,7 +6,6 @@ WriteMakefile(
     NAME                => 'Dancer::Plugin::SporeDefinitionControl',
     AUTHOR              => q{Nicolas Oudard <nicolas@oudard.org>},
     VERSION_FROM        => 'lib/Dancer/Plugin/SporeDefinitionControl.pm',
-    ABSTRACT_FROM       => 'lib/Dancer/Plugin/SporeDefinitionControl.pm',
     LICENSE             => 'perl',
     PL_FILES            => {},
     PREREQ_PM => {
