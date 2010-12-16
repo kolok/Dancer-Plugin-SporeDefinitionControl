@@ -1,0 +1,10 @@
+~$
+\.svn
+\.git
+\.DS_Store
+\.bak
+\.old
+dist
+\.tar.gz$
+blib
+Makefile$

@@ -1,11 +1,13 @@
 Changes
 config.yml
+Dancer-Plugin-SporeDefinitionControl-0.02.tar.gz
 environments/development.yml
 environments/production.yml
 ignore.txt
 lib/Dancer/Plugin/SporeDefinitionControl.pm
 Makefile.PL
 MANIFEST
+MANIFEST.skip
 MANIFEST.SKIP
 README
 t/00-load.t
