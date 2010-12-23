@@ -16,25 +16,18 @@ Dancer Plugin to control validity of route from a Spore configuration file
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 =head1 SYNOPSIS
 
-to use it, you need to install this version of Dancer :
-  - https://github.com/kolok/Dancer
+Dancer required version : 1.3000_01
 
-or apply this patch on a git version :
-  - https://github.com/kolok/Dancer/commit/b6c45ea908f8784a9d3e0764c5d4112a8e80bfac
-  - https://github.com/kolok/Dancer/commit/cb7ed40802630e0fb2d73e3482292398f8a6854c
-  - https://github.com/kolok/Dancer/commit/941630a890d35312f36ada60b42d2a53d5fcbe75
-  - https://github.com/kolok/Dancer/commit/9d9949101f624d0d506bd183f0070133d4bb74ee
-
-in your Dancer project use this plugin and register  :
+in your Dancer project, use this plugin and register  :
 
     package MyDancer::Server;
 
@@ -42,7 +35,58 @@ in your Dancer project use this plugin and register  :
 
     check_spore_definition();
 
+In your config file :
+
+    plugins:
+      SporeDefinitionControl:
+        spore_spec_path: path/to/route_config.yaml
+
+The yaml path file can be relative (root project base) or absolute.
+
+in your file path/to/route_config.yaml, put your SPORE config :
+
+    base_url: http://localhost:4500
+    version: 0.2
+    format:
+      - json
+      - xml
+      - yml
+    methods:
+      get_object:
+        required_params:
+          - id
+          - name_object
+        optional_params:
+          - created_at
+        path: /object/:id
+        method: GET
+      create_object:
+        required_params:
+          - name_object
+        optional_params:
+          - created_at
+        path: /object/create
+        method: POST
+      update_object:
+        required_params:
+          - id
+          - name_object
+        optional_params:
+          - created_at
+        path: /object/:id
+        method: PUT
+      delete_object:
+        required_params:
+          - id
+          - name_object
+        optional_params:
+          - created_at
+        path: /object/:id
+        method: DELETE
+
 =head1 INITIALISATION
+
+Load yaml config file
 
 =cut
 
@@ -75,14 +119,15 @@ register 'check_spore_definition' => sub {
         my $req = request;
         my %req_params = params;
         return unless (defined( $req->method() ) );
-        return unless (defined( $req->route_pattern() ) );
+        return unless (defined( $req->{_route_pattern} ) );
         return unless (defined( $rh_path_validation->{$req->method()} ) );
-        return unless (defined( $rh_path_validation->{$req->method()}->{$req->route_pattern()} ) );
-        my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->route_pattern()}->{'required_params'};
-        my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->route_pattern()}->{'optional_params'};
+        return unless (defined( $rh_path_validation->{$req->method()}->{$req->{_route_pattern}} ) );
+        my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'required_params'};
+        my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'optional_params'};
         # check if required params are present
         foreach my $required_param (@{$ra_required_params})
         {
+debug "REQUIRE ERROR : required params `$required_param' is not defined\n" if (!defined params->{$required_param});
           return halt(send_error("required params `$required_param' is not defined",
               400)) if (!defined params->{$required_param});
         }
@@ -92,6 +137,7 @@ register 'check_spore_definition' => sub {
         # check for each params if they are specified in spore spec
         foreach my $param (keys %req_params)
         {
+debug "UNKNOW ERROR : parameter `$param' is unknow\n" if (!(grep {/^$param$/} @list_total));
           return halt(send_error("parameter `$param' is unknow",
               400)) if (!(grep {/^$param$/} @list_total));
         }

@@ -9,7 +9,7 @@ WriteMakefile(
     LICENSE             => 'perl',
     PL_FILES            => {},
     PREREQ_PM => {
-      'Dancer' => 0,
+      'Dancer' => 1.3000,
       'Dancer::Plugin' => 0,
       'Dancer::Test' => 0,
       'YAML' => 0,
