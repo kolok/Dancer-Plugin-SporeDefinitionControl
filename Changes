@@ -1,5 +1,12 @@
 Revision history for Dancer-Plugin-SporeDefinitionControl
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.03    2010-12-23, Nicolas Oudard
+        Delete dependence of Dancer patch
+        Use at least Dancer version 1.3000
+
+0.02    2010-12-31, Nicolas Oudard
+        add tests
+
+0.01    2010-09-01, Nicolas Oudard
+        First version.
 
