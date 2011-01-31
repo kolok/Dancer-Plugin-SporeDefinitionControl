@@ -5,6 +5,7 @@ use strict;
 
 use Dancer ':syntax';
 use Dancer::Plugin;
+use Dancer::Plugin::REST '0.04';
 use YAML qw/LoadFile DumpFile/;
 use File::Spec;
 
@@ -90,6 +91,7 @@ Load yaml config file
 
 =cut
 
+
 #Load definition spore file from plugin config
 my $path_to_spore_def = plugin_setting->{'spore_spec_path'};
 $path_to_spore_def = File::Spec->catfile( setting('appdir') , $path_to_spore_def) unless (File::Spec->file_name_is_absolute($path_to_spore_def));
@@ -122,23 +124,19 @@ register 'check_spore_definition' => sub {
         die "route pattern request must be defined" unless (defined( $req->{_route_pattern} ) );
         unless (defined( $rh_path_validation->{$req->method()} ) )
         {
-debug "REQUIRE ERROR : no route with method `$req->method()' is defined\n";
-          return halt(send_error("no route with method `$req->method()' is defined", 400));
+          return _returned_error("no route with method `$req->method()' is defined");
         }
 #TODO : return an error because path does not exist in specification
         unless (defined( $rh_path_validation->{$req->method()}->{$req->{_route_pattern}} ) )
         {
-debug "REQUIRE ERROR : route pattern `$req->{_route_pattern}' is not defined\n";
-          return halt(send_error("route pattern `$req->{_route_pattern}' is not defined", 400));
+          return _returned_error("route pattern `$req->{_route_pattern}' is not defined");
         }
         my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'required_params'};
         my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'optional_params'};
         # check if required params are present
         foreach my $required_param (@{$ra_required_params})
         {
-debug "REQUIRE ERROR : required params `$required_param' is not defined\n" if (!defined params->{$required_param});
-          return halt(send_error("required params `$required_param' is not defined",
-              400)) if (!defined params->{$required_param});
+          return _returned_error("required params `$required_param' is not defined") if (!defined params->{$required_param});
         }
         my @list_total = ('format');
         @list_total = (@list_total, @{$ra_required_params}) if defined($ra_required_params);
@@ -146,12 +144,19 @@ debug "REQUIRE ERROR : required params `$required_param' is not defined\n" if (!
         # check for each params if they are specified in spore spec
         foreach my $param (keys %req_params)
         {
-debug "UNKNOW ERROR : parameter `$param' is unknow\n" if (!(grep {/^$param$/} @list_total));
-          return halt(send_error("parameter `$param' is unknow",
-              400)) if (!(grep {/^$param$/} @list_total));
+          return _returned_error("parameter `$param' is unknow") if (!(grep {/^$param$/} @list_total));
         }
       };
 };
+
+sub _returned_error
+{
+  my $str_error = shift;
+  set serializer => 'JSON';
+  debug $str_error."\n";
+  #return halt(send_error($str_error,400));
+  return halt(status_bad_request($str_error));
+}
 
 =head1 AUTHOR
 
