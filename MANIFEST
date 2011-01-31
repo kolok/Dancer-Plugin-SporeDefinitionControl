@@ -10,9 +10,17 @@ MANIFEST.SKIP
 README
 t/00-load.t
 t/01-check_spore_definition.t
+t/02-check_missing_method_definition.t
+t/03-check_missing_put_method_definition.t
+t/04-check_missing_post_method_definition.t
+t/05-check_missing_delete_method_definition.t
 t/boilerplate.t
 t/lib/WebService.pm
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
 t/sample_route.yaml
+t/sample_route_no_delete.yaml
+t/sample_route_no_get.yaml
+t/sample_route_no_post.yaml
+t/sample_route_no_put.yaml

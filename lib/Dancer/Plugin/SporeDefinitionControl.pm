@@ -118,10 +118,19 @@ register 'check_spore_definition' => sub {
     before sub {
         my $req = request;
         my %req_params = params;
-        return unless (defined( $req->method() ) );
-        return unless (defined( $req->{_route_pattern} ) );
-        return unless (defined( $rh_path_validation->{$req->method()} ) );
-        return unless (defined( $rh_path_validation->{$req->method()}->{$req->{_route_pattern}} ) );
+        die "method request must be defined" unless (defined( $req->method() ) );
+        die "route pattern request must be defined" unless (defined( $req->{_route_pattern} ) );
+        unless (defined( $rh_path_validation->{$req->method()} ) )
+        {
+debug "REQUIRE ERROR : no route with method `$req->method()' is defined\n";
+          return halt(send_error("no route with method `$req->method()' is defined", 400));
+        }
+#TODO : return an error because path does not exist in specification
+        unless (defined( $rh_path_validation->{$req->method()}->{$req->{_route_pattern}} ) )
+        {
+debug "REQUIRE ERROR : route pattern `$req->{_route_pattern}' is not defined\n";
+          return halt(send_error("route pattern `$req->{_route_pattern}' is not defined", 400));
+        }
         my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'required_params'};
         my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'optional_params'};
         # check if required params are present
@@ -143,8 +152,6 @@ debug "UNKNOW ERROR : parameter `$param' is unknow\n" if (!(grep {/^$param$/} @l
         }
       };
 };
-
-
 
 =head1 AUTHOR
 

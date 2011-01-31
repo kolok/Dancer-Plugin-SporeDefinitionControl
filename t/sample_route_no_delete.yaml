@@ -29,11 +29,4 @@ methods:
       - created_at
     path: /object/:id
     method: PUT
-  delete_object:
-    required_params:
-      - id
-      - name_object
-    optional_params:
-      - created_at
-    path: /object/:id
-    method: DELETE
+
