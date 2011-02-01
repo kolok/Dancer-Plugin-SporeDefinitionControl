@@ -11,6 +11,7 @@ WriteMakefile(
     PREREQ_PM => {
       'Dancer' => 1.3000,
       'Dancer::Plugin' => 0,
+      'Dancer::Plugin::REST' => 0.04,
       'Dancer::Test' => 0,
       'YAML' => 0,
       'File::Spec' => 0,
