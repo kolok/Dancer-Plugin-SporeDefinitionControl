@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 2, import => ["!pass"];
+use Test::More tests => 3, import => ["!pass"];
 
 use Dancer;
 use Dancer::Test;
@@ -23,5 +23,5 @@ my $params3  = { params => {name_object => 'test_result', created_at => '2010-10
 response_status_is ['GET' => '/object/12', $params1], 200, "GET method is OK";
 # No POST spore specification
 response_status_is ['POST' => '/object', $params1], 400, "POST method is missing in spore specification";
-
+response_content_is ['POST' => '/object', $params1], '{"error":"no route define with method `POST\'"}', "POST method is missing in spore specification";
 
