@@ -21,12 +21,12 @@ Version 0.03
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 
 =head1 SYNOPSIS
 
-Dancer required version : 1.3000_01
+Dancer required version : 1.3002
 
 in your Dancer project, use this plugin and register  :
 
