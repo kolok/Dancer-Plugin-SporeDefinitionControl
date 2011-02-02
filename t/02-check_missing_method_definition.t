@@ -6,6 +6,7 @@ use Dancer;
 use Dancer::Test;
 
 BEGIN {
+  set environment => 'test';
   set plugins => {
     SporeDefinitionControl => {
       spore_spec_path => "sample_route_no_get.yaml",
