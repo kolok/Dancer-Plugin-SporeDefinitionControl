@@ -23,6 +23,6 @@ my $params3  = { params => {name_object => 'test_result', created_at => '2010-10
 # check if PUT method works
 response_status_is ['PUT' => '/object/12', $params1], 200, "PUT method is OK";
 # No GET spore specification
-response_status_is ['GET' => '/object/12', $params1], 400, "GET method is missing in spore specification";
+response_status_is ['GET' => '/object/12', $params1], 404, "GET method is missing in spore specification";
 response_content_is ['GET' => '/object/12', $params1], '{"error":"no route define with method `GET\'"}', "GET method is missing in spore specification";
 

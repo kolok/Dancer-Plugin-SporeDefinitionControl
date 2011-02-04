@@ -125,20 +125,20 @@ register 'check_spore_definition' => sub {
         unless (defined( $rh_path_validation->{$req->method()} ) )
         {
           my $req_method = $req->method();
-          return _returned_error("no route define with method `$req_method'");
+          return _returned_error("no route define with method `$req_method'", 404);
         }
 #TODO : return an error because path does not exist in specification
         unless (defined( $rh_path_validation->{$req->method()}->{$req->{_route_pattern}} ) )
         {
           my $req_route_pattern = $req->{_route_pattern};
-          return _returned_error("route pattern `$req_route_pattern' is not defined");
+          return _returned_error("route pattern `$req_route_pattern' is not defined",404);
         }
         my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'required_params'};
         my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'optional_params'};
         # check if required params are present
         foreach my $required_param (@{$ra_required_params})
         {
-          return _returned_error("required params `$required_param' is not defined") if (!defined params->{$required_param});
+          return _returned_error("required params `$required_param' is not defined",400) if (!defined params->{$required_param});
         }
         my @list_total = ('format');
         @list_total = (@list_total, @{$ra_required_params}) if defined($ra_required_params);
@@ -146,7 +146,7 @@ register 'check_spore_definition' => sub {
         # check for each params if they are specified in spore spec
         foreach my $param (keys %req_params)
         {
-          return _returned_error("parameter `$param' is unknow") if (!(grep {/^$param$/} @list_total));
+          return _returned_error("parameter `$param' is unknow",400) if (!(grep {/^$param$/} @list_total));
         }
       };
 };
@@ -154,10 +154,21 @@ register 'check_spore_definition' => sub {
 sub _returned_error
 {
   my $str_error = shift;
+  my $code_error = shift;
+  $code_error ||= 400;
   set serializer => 'JSON';
   debug $str_error."\n";
   #return halt(send_error($str_error,400));
-  return halt(status_bad_request($str_error));
+  if ($code_error == 400)
+  {
+    return halt(status_bad_request($str_error));
+  }
+  elsif ($code_error == 404)
+  {
+    return halt(status_not_found($str_error));
+  }
+  else
+  {die "Unknown code";}
 }
 
 =head1 AUTHOR
