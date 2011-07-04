@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-SporeDefinitionControl
 
+0.08    2011-07-03, Nicolas Oudard
+        Allow functions to have the same route
+
 0.03    2010-12-23, Nicolas Oudard
         Delete dependence of Dancer patch
         Use at least Dancer version 1.3000

@@ -17,11 +17,11 @@ Dancer Plugin to control validity of route from a Spore configuration file
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 SYNOPSIS
 
