@@ -103,11 +103,11 @@ $rh_file = LoadFile($path_to_spore_def);
 our $rh_path_validation = {};
 foreach my $method_name (keys(%{$rh_file->{'methods'}}))
 {
-  $rh_path_validation->{$rh_file->{'methods'}->{$method_name}->{'method'}}->{$rh_file->{'methods'}->{$method_name}->{'path'}} = 
-  {
-    required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
-    optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
-  };
+  push @{$rh_path_validation->{$rh_file->{'methods'}->{$method_name}->{'method'}}->{$rh_file->{'methods'}->{$method_name}->{'path'}}},
+    {
+      required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
+      optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
+    };
 }
 
 =head1 SUBROUTINES/METHODS
@@ -135,21 +135,42 @@ register 'check_spore_definition' => sub {
           my $req_route_pattern = $req->{_route_pattern};
           return _returned_error("route pattern `$req_route_pattern' is not defined",404);
         }
-        my $ra_required_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'required_params'};
-        my $ra_optional_params = $rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{'optional_params'};
-        # check if required params are present
-        foreach my $required_param (@{$ra_required_params})
+
+
+        my $is_ok = 0;
+        my $error;
+        foreach my $route_defined (@{$rh_path_validation->{$req->method()}->{$req->{_route_pattern}}})
         {
-          return _returned_error("required params `$required_param' is not defined",400) if (!defined params->{$required_param});
+            my $ko;
+            my $ra_required_params = $route_defined->{'required_params'};
+            my $ra_optional_params = $route_defined->{'optional_params'};
+            # check if required params are present
+            foreach my $required_param (@{$ra_required_params})
+            {
+                if (!defined params->{$required_param})
+                {
+                    $error = "required params `$required_param' is not defined";
+                    $ko = 1;
+                }
+            }
+            next if $ko;
+            my @list_total = ('format');
+            @list_total = (@list_total, @{$ra_required_params}) if defined($ra_required_params);
+            @list_total = (@list_total, @{$ra_optional_params}) if defined($ra_optional_params);
+            # check for each params if they are specified in spore spec
+            foreach my $param (keys %req_params)
+            {
+                if (!(grep {/^$param$/} @list_total))
+                {
+                    $error  = "parameter `$param' is unknow";
+                    $ko = 1 ;
+                }
+            }
+            next if $ko;
+            $is_ok = 1;
         }
-        my @list_total = ('format');
-        @list_total = (@list_total, @{$ra_required_params}) if defined($ra_required_params);
-        @list_total = (@list_total, @{$ra_optional_params}) if defined($ra_optional_params);
-        # check for each params if they are specified in spore spec
-        foreach my $param (keys %req_params)
-        {
-          return _returned_error("parameter `$param' is unknow",400) if (!(grep {/^$param$/} @list_total));
-        }
+        return _returned_error($error,400) unless $is_ok;
+
       };
 };
 
