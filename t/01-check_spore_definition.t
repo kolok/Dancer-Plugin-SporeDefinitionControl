@@ -1,6 +1,6 @@
 #!perl
 
-use Test::More tests => 32, import => ["!pass"];
+use Test::More tests => 33, import => ["!pass"];
 
 use Dancer;
 use Dancer::Test;
