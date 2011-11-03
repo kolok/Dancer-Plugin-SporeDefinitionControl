@@ -21,6 +21,13 @@ methods:
       - created_at
     path: /object
     method: POST
+  get_or_create_object:
+    required_params:
+      - name_object
+    optional_params:
+      - created_at
+    path: /object?params_sup=1
+    method: POST
   update_object:
     required_params:
       - id

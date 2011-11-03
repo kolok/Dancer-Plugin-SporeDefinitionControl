@@ -103,11 +103,24 @@ $rh_file = LoadFile($path_to_spore_def);
 our $rh_path_validation = {};
 foreach my $method_name (keys(%{$rh_file->{'methods'}}))
 {
-  push @{$rh_path_validation->{$rh_file->{'methods'}->{$method_name}->{'method'}}->{$rh_file->{'methods'}->{$method_name}->{'path'}}},
+
+
+    my $method = $rh_file->{'methods'}->{$method_name}->{'method'};
+    my $complet_path = $rh_file->{'methods'}->{$method_name}->{'path'};
+    my ($path, $query_params) = split(/\?/, $complet_path);
+    my @additional_params;
+    if (defined $query_params)
     {
-      required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
-      optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
-    };
+        @additional_params = map { $_ =~ s/=.*//g; $_ } split( /\&/, $query_params) ;
+        push @{$rh_file->{'methods'}->{$method_name}->{'required_params'}}, @additional_params;
+    }
+
+
+    push @{$rh_path_validation->{$method}->{$path}},
+      {
+        required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
+        optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
+      };
 }
 
 =head1 SUBROUTINES/METHODS
@@ -124,6 +137,8 @@ register 'check_spore_definition' => sub {
         my %req_params = params;
         die "method request must be defined" unless (defined( $req->method() ) );
         die "route pattern request must be defined" unless (defined( $req->{_route_pattern} ) );
+#        my $all_route_pattern = $req->{_route_pattern};
+#my $detail_route_pattern =  split /?/, $route_pattern;
         unless (defined( $rh_path_validation->{$req->method()} ) )
         {
           my $req_method = $req->method();
