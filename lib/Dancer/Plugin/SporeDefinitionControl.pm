@@ -116,11 +116,11 @@ foreach my $method_name (keys(%{$rh_file->{'methods'}}))
     }
 
 
-  push @{$rh_path_validation->{$method}->{$path}},
-    {
-      required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
-      optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
-    };
+    push @{$rh_path_validation->{$method}->{$path}},
+      {
+        required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
+        optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
+      };
 }
 
 =head1 SUBROUTINES/METHODS
