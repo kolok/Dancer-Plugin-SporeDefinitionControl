@@ -132,7 +132,7 @@ define spore validation to do on entered request
 =cut
 
 register 'check_spore_definition' => sub {
-    before sub {
+    hook before => sub {
         my $req = request;
         my %req_params = params;
         die "method request must be defined" unless (defined( $req->method() ) );
