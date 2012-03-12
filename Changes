@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-SporeDefinitionControl
 
+0.10    2011-07-03, Nicolas Oudard
+        New before call from new Dancer version (Dams)
+
 0.08    2011-07-03, Nicolas Oudard
         Allow functions to have the same route
 
