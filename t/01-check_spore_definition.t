@@ -1,5 +1,8 @@
 #!perl
 
+use FindBin;
+BEGIN { $ENV{DANCER_APPDIR} = $FindBin::Bin }
+
 use Test::More tests => 33, import => ["!pass"];
 
 use Dancer;
