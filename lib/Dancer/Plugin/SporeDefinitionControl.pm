@@ -136,7 +136,7 @@ register 'check_spore_definition' => sub {
         my $req = request;
         my %req_params = params;
         die "method request must be defined" unless (defined( $req->method() ) );
-        die "route pattern request must be defined" unless (defined( $req->{_route_pattern} ) );
+        _returned_error( "route pattern request must be defined", 404) unless (defined( $req->{_route_pattern} ) );
 #        my $all_route_pattern = $req->{_route_pattern};
 #my $detail_route_pattern =  split /?/, $route_pattern;
         unless (defined( $rh_path_validation->{$req->method()} ) )
