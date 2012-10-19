@@ -125,9 +125,8 @@ foreach my $method_name (keys(%{$rh_file->{'methods'}}))
     $method_path->{$method}->{$path} = $method_name;
 }
 
-register 'get_method_path_method_name' => sub {
-        return $method_path;
-};
+
+
 
 =head1 SUBROUTINES/METHODS
 
@@ -193,6 +192,16 @@ register 'check_spore_definition' => sub {
         return _returned_error($error,400) unless $is_ok;
 
       };
+};
+
+=head2 get_method_path_method_name
+
+return the hash method -> path = method_name
+
+=cut
+
+register 'get_method_path_method_name' => sub {
+        return $method_path;
 };
 
 sub _returned_error
