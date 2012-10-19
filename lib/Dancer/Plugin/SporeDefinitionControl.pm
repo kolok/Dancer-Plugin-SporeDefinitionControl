@@ -101,6 +101,7 @@ $rh_file = LoadFile($path_to_spore_def);
 }
 #load validation hash
 our $rh_path_validation = {};
+our $method_path;
 foreach my $method_name (keys(%{$rh_file->{'methods'}}))
 {
 
@@ -121,7 +122,11 @@ foreach my $method_name (keys(%{$rh_file->{'methods'}}))
         required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
         optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
       };
+    $method_path->{$method}->{$path} = $method_name;
 }
+
+
+
 
 =head1 SUBROUTINES/METHODS
 
@@ -187,6 +192,16 @@ register 'check_spore_definition' => sub {
         return _returned_error($error,400) unless $is_ok;
 
       };
+};
+
+=head2 get_method_path_method_name
+
+return the hash method -> path = method_name
+
+=cut
+
+register 'get_method_path_method_name' => sub {
+        return $method_path;
 };
 
 sub _returned_error
