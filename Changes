@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-SporeDefinitionControl
 
+0.12    2012-10-24, Nicolas Oudard
+        new get_functions_from_request which return all function 
+          on specs which match to path and method
+
 0.11    2012-06-25, Nicolas Oudard
         Change error returned if no route pattern is find
 
