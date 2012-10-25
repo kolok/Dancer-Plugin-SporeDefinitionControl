@@ -17,11 +17,11 @@ Dancer Plugin to control validity of route from a Spore configuration file
 
 =head1 VERSION
 
-Version 0.12
+Version 0.13
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =head1 SYNOPSIS
 
@@ -92,37 +92,45 @@ Load yaml config file
 
 
 #Load definition spore file from plugin config
-my $path_to_spore_def = plugin_setting->{'spore_spec_path'};
-my $rh_file = {};
-if ($path_to_spore_def)
-{
-$path_to_spore_def = File::Spec->catfile( setting('appdir') , $path_to_spore_def) unless (File::Spec->file_name_is_absolute($path_to_spore_def));
-$rh_file = LoadFile($path_to_spore_def);
-}
-#load validation hash
-our $rh_path_validation = {};
-foreach my $method_name (keys(%{$rh_file->{'methods'}}))
-{
 
+our $path_validation;
 
-    my $method = $rh_file->{'methods'}->{$method_name}->{'method'};
-    my $complet_path = $rh_file->{'methods'}->{$method_name}->{'path'};
-    my ($path, $query_params) = split(/\?/, $complet_path);
-    my @additional_params;
-    if (defined $query_params)
+sub _load_path_validation
+{
+    my $rh_file = {};
+
+    my $path_to_spore_def = plugin_setting->{'spore_spec_path'};
+    if ($path_to_spore_def)
     {
-        @additional_params = map { $_ =~ s/=.*//g; $_ } split( /\&/, $query_params) ;
-        push @{$rh_file->{'methods'}->{$method_name}->{'required_params'}}, @additional_params;
+    $path_to_spore_def = File::Spec->catfile( setting('appdir') , $path_to_spore_def) unless (File::Spec->file_name_is_absolute($path_to_spore_def));
+    $rh_file = LoadFile($path_to_spore_def);
     }
+    my $path_valid;
+    #load validation hash
+    foreach my $method_name (keys(%{$rh_file->{'methods'}}))
+    {
 
 
-    push @{$rh_path_validation->{$method}->{$path}->{params}},
-      {
-        required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
-        optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
-      };
-    $rh_path_validation->{$method}->{$path}->{functions}->{$method_name} = 1;
-}
+        my $method = $rh_file->{'methods'}->{$method_name}->{'method'};
+        my $complet_path = $rh_file->{'methods'}->{$method_name}->{'path'};
+        my ($path, $query_params) = split(/\?/, $complet_path);
+        my @additional_params;
+        if (defined $query_params)
+        {
+            @additional_params = map { $_ =~ s/=.*//g; $_ } split( /\&/, $query_params) ;
+            push @{$rh_file->{'methods'}->{$method_name}->{'required_params'}}, @additional_params;
+        }
+
+
+        push @{$path_valid->{$method}->{$path}->{params}},
+          {
+            required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
+            optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
+          };
+        $path_valid->{$method}->{$path}->{functions}->{$method_name} = 1;
+    }
+    return $path_valid;
+};
 
 
 
@@ -143,13 +151,14 @@ register 'check_spore_definition' => sub {
         _returned_error( "route pattern request must be defined", 404) unless (defined( $req->{_route_pattern} ) );
 #        my $all_route_pattern = $req->{_route_pattern};
 #my $detail_route_pattern =  split /?/, $route_pattern;
-        unless (defined( $rh_path_validation->{$req->method()} ) )
+        $path_validation = _load_path_validation() if !$path_validation;
+        unless (defined( $path_validation->{$req->method()} ) )
         {
           my $req_method = $req->method();
           return _returned_error("no route define with method `$req_method'", 404);
         }
 #TODO : return an error because path does not exist in specification
-        unless (defined( $rh_path_validation->{$req->method()}->{$req->{_route_pattern}} ) )
+        unless (defined( $path_validation->{$req->method()}->{$req->{_route_pattern}} ) )
         {
           my $req_route_pattern = $req->{_route_pattern};
           return _returned_error("route pattern `$req_route_pattern' is not defined",404);
@@ -158,7 +167,7 @@ register 'check_spore_definition' => sub {
 
         my $is_ok = 0;
         my $error;
-        foreach my $route_defined (@{$rh_path_validation->{$req->method()}->{$req->{_route_pattern}}->{params}})
+        foreach my $route_defined (@{$path_validation->{$req->method()}->{$req->{_route_pattern}}->{params}})
         {
             my $ko;
             my $ra_required_params = $route_defined->{'required_params'};
@@ -202,9 +211,10 @@ return the hash of functions available from method and path.
 register 'get_functions_from_request' => sub {
     my $req = request;
 
+    $path_validation = _load_path_validation() if !$path_validation;
     my $method = $req->method();
     my $path = $req->{_route_pattern};
-    my $functions = $rh_path_validation->{$method}->{$path}->{functions};
+    my $functions = $path_validation->{$method}->{$path}->{functions};
     return $functions;
 };
 

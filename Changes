@@ -1,5 +1,8 @@
 Revision history for Dancer-Plugin-SporeDefinitionControl
 
+0.13    2012-10-25, Nicolas Oudard
+        Load spore fiel on the first use instead of on the load of the module
+
 0.12    2012-10-24, Nicolas Oudard
         new get_functions_from_request which return all function 
           on specs which match to path and method
