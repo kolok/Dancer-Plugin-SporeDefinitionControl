@@ -105,6 +105,7 @@ sub _load_path_validation
     $path_to_spore_def = File::Spec->catfile( setting('appdir') , $path_to_spore_def) unless (File::Spec->file_name_is_absolute($path_to_spore_def));
     $rh_file = LoadFile($path_to_spore_def);
     }
+
     my $path_valid;
     #load validation hash
     foreach my $method_name (keys(%{$rh_file->{'methods'}}))
@@ -126,6 +127,7 @@ sub _load_path_validation
           {
             required_params => $rh_file->{'methods'}->{$method_name}->{'required_params'},
             optional_params => $rh_file->{'methods'}->{$method_name}->{'optional_params'},
+            form_data_params => $rh_file->{'methods'}->{$method_name}->{'form-data'},
           };
         $path_valid->{$method}->{$path}->{functions}->{$method_name} = 1;
     }
@@ -172,7 +174,15 @@ register 'check_spore_definition' => sub {
             my $ko;
             my $ra_required_params = $route_defined->{'required_params'};
             my $ra_optional_params = $route_defined->{'optional_params'};
+            my $ra_form_data_params;
+            if ($route_defined->{'form_data_params'}){
+                foreach my $k (keys %{$route_defined->{'form_data_params'}}){
+                    push @{$ra_form_data_params}, $k;
+                }
+            }
+
             # check if required params are present
+
             foreach my $required_param (@{$ra_required_params})
             {
                 if (!defined params->{$required_param})
@@ -182,10 +192,13 @@ register 'check_spore_definition' => sub {
                 }
             }
             next if $ko;
+
             my @list_total = ('format');
             @list_total = (@list_total, @{$ra_required_params}) if defined($ra_required_params);
             @list_total = (@list_total, @{$ra_optional_params}) if defined($ra_optional_params);
+            @list_total = (@list_total, @{$ra_form_data_params}) if defined($ra_form_data_params);
             # check for each params if they are specified in spore spec
+           
             foreach my $param (keys %req_params)
             {
                 if (!(grep {/^$param$/} @list_total))
@@ -201,6 +214,7 @@ register 'check_spore_definition' => sub {
 
       };
 };
+
 
 =head2 get_functions_from_request
 

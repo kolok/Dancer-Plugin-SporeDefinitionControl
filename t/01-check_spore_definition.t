@@ -3,7 +3,7 @@
 use FindBin;
 BEGIN { $ENV{DANCER_APPDIR} = $FindBin::Bin }
 
-use Test::More tests => 33, import => ["!pass"];
+use Test::More tests => 36, import => ["!pass"];
 
 use Dancer;
 use Dancer::Test;
@@ -23,6 +23,7 @@ my $params1  = { params => {name_object => 'test_result'} };
 my $params2  = { params => {name_object => 'test_result', created_at => '2010-10-10'} };
 my $params3  = { params => {name_object => 'test_result', created_at => '2010-10-10', test => 'test_result'} };
 my $params4  = { params => {name_object => 'test_result', params_sup => 1 } };
+my $params5  = { params => {name_object => 'test_result', my_file =>  {filename => "test.png", name => "my_file" } } };
 
 response_status_is ['GET' => '/object/12'], 400, "GET required param is missing";
 response_content_is ['GET' => '/object/12'], '{"error":"required params `name_object\' is not defined"}', "GET required param is missing";
@@ -36,6 +37,10 @@ response_content_is ['GET' => '/nimportequoi/12', $params1], '{"error":"route pa
 response_status_is ['POST' => '/object'], 400, "POST required param is missing";
 response_content_is ['POST' => '/object'], '{"error":"required params `name_object\' is not defined"}', "GET required param is missing";
 response_status_is ['POST' => '/object', $params1 ], 200, "POST required param is set";
+response_status_is ['POST' => '/object', $params5 ], 400, "POST an unknown param is set : my_file";
+response_status_is ['POST' => '/anotherobject', $params1 ], 200, "POST required param is set";
+response_status_is ['POST' => '/anotherobject', $params5 ], 200, "POST required param is set";
+
 response_status_is ['POST' => '/object', $params2 ], 200, "POST required and optional params";
 response_status_is ['POST' => '/object', $params4 ], 200, "POST required and optional params in path";
 response_status_is ['POST' => '/object', $params3], 400, "POST unknown params";

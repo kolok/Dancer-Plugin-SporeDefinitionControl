@@ -10,6 +10,7 @@ check_spore_definition();
     get '/object/:id' => sub { "OK" };
     post '/nimportequoi' => sub { "OK" };
     post '/object' => sub { "OK" };
+    post '/anotherobject' => sub { "OK" };
     put '/nimportequoi/:id' => sub { "OK" };
     put '/object/:id' => sub { "OK" };
     del '/nimportequoi/:id' => sub { "OK" };
