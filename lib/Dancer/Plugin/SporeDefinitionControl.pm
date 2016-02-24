@@ -190,7 +190,7 @@ register 'check_spore_definition' => sub {
             {
                 if (!(grep {/^$param$/} @list_total))
                 {
-                    $error  = "parameter `$param' is unknow";
+                    $error  = "parameter `$param' is unknown";
                     $ko = 1 ;
                 }
             }
