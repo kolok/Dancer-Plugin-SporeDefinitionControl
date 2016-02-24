@@ -1,5 +1,9 @@
 Revision history for Dancer-Plugin-SporeDefinitionControl
 
+0.14    2016-02-24, Nicolas Oudard
+        Fix typo in error message when a parameter is wrong (Simon Lenne)
+        manage form-data in check_spore_definition (Frederic Lechauve)
+
 0.13    2012-10-25, Nicolas Oudard
         Load spore fiel on the first use instead of on the load of the module
 
