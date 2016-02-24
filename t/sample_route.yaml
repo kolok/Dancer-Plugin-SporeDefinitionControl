@@ -44,3 +44,13 @@ methods:
       - created_at
     path: /object/:id
     method: DELETE
+  create_anotherobject:
+    required_params:
+      - name_object
+    optional_params:
+      - created_at
+    form-data:
+      my_file: ":my_file"
+    path: /anotherobject
+    method: POST
+
