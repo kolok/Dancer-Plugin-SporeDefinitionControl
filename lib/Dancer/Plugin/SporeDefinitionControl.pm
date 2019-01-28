@@ -174,7 +174,7 @@ register 'check_spore_definition' => sub {
 
 #        my $all_route_pattern = $req->{_route_pattern};
 #my $detail_route_pattern =  split /?/, $route_pattern;
-        #$path_validation = _load_path_validation() if !$path_validation;
+        $path_validation = _load_path_validation() if !$path_validation;
         unless (defined( $path_validation->{method}->{$req->method()}) || uc($req->method()) eq "OPTIONS" )
         {
           my $req_method = $req->method();
