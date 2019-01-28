@@ -14,6 +14,8 @@ BEGIN {
     SporeDefinitionControl => {
       spore_spec_path => "sample_route_no_put.yaml",
       spore_spec_with_options => 1,
+      build_options_route => {
+      },
     },
   };
 }

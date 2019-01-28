@@ -13,12 +13,12 @@ BEGIN {
   set plugins => {
     SporeDefinitionControl => {
       spore_spec_path => "sample_route.yaml",
-      spore_spec_with_options => 1,
-      spore_spec_allow_credentials => 'true',
-      spore_spec_allow_headers => 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Cookie,X-Weborama-UserAuthToken,X-Weborama-Account_Id',
-      spore_spec_allow_origin => '*',
-      spore_spec_max_age => '1728000',
-      
+      build_options_route => {
+          header_allow_credentials => 'true',
+          header_allow_headers => 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Cookie,X-Weborama-UserAuthToken,X-Weborama-Account_Id',
+          header_allow_allow_origin => '*',
+          header_max_age => '1728000',
+      }
     },
   };
 }

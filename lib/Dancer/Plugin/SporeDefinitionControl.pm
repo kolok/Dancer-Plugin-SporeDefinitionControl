@@ -101,7 +101,7 @@ sub _load_path_validation
     my $rh_file = {};
 
     my $path_to_spore_def = plugin_setting->{'spore_spec_path'};
-    my $spore_spec_with_options = plugin_setting->{'spore_spec_with_options'};
+    my $build_options_route = plugin_setting->{'build_options_route'};
     if ($path_to_spore_def)
     {
     $path_to_spore_def = File::Spec->catfile( setting('appdir') , $path_to_spore_def) unless (File::Spec->file_name_is_absolute($path_to_spore_def));
@@ -133,7 +133,7 @@ sub _load_path_validation
         $path_valid->{method}->{$method}->{$path}->{functions}->{$method_name} = 1;
 
     }
-    init_routes_options($path_valid->{path}) if (defined $spore_spec_with_options);
+    init_routes_options($path_valid->{path}) if (defined $build_options_route);
     return $path_valid;
 };
 
@@ -149,13 +149,6 @@ sub init_routes_options(){
     my $paths = shift;
     foreach my $path (keys %{$paths}){
             options $path => sub {
-#                status 200;
-#                header 'access-control-allow-credentials' => plugin_setting->{'spore_spec_allow_credentials'} || '';
-#                header 'access-control-allow-headers' => plugin_setting->{'spore_spec_allow_headers'} || '';
-#                header 'access-control-allow-methods' => join (',',$paths->{$path}).",'OPTIONS'";
-#                header 'access-control-allow-origin' => plugin_setting->{'spore_spec_'} || '';
-#                header 'access-control-max-age' => plugin_setting->{'spore_spec_'}  || '';
-#                return halt('{"status":200,"message":"OK"}');
             };
 
         }
@@ -290,14 +283,15 @@ sub _returned_options_methods
   my $methods = shift;
   my %seen = ();
   my @unique_methods = grep { !$seen{$_}++ } @{$methods};
+  my $build_options_route = plugin_setting->{'build_options_route'};
   if (defined $methods){
   set serializer => 'JSON';
   status 200;
-  header 'access-control-allow-credentials' => plugin_setting->{'spore_spec_allow_credentials'} || '';
-  header 'access-control-allow-headers' => plugin_setting->{'spore_spec_allow_headers'} || '';
-  header 'access-control-allow-methods' => join(",",@unique_methods).",OPTIONS";
-  header 'access-control-allow-origin' => plugin_setting->{'spore_spec_allow_origin'} || '';
-  header 'access-control-max-age' => plugin_setting->{'spore_spec_max_age'}  || '';
+  header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} || '';
+  header 'access-control-allow-headers' => $build_options_route->{'header_allow_headers'} || '';
+  header 'access-control-allow-methods' => join(",",@unique_methods,'OPTIONS');
+  header 'access-control-allow-origin' => $build_options_route->{'header_allow_allow_origin'} || '';
+  header 'access-control-max-age' => $build_options_route->{'header_max_age'}  || '';
   return halt('{"status":200,"message":"OK"}');
   }
   else{
