@@ -3,7 +3,7 @@
 use FindBin;
 BEGIN { $ENV{DANCER_APPDIR} = $FindBin::Bin }
 
-use Test::More tests => 55, import => ["!pass"];
+use Test::More tests => 56, import => ["!pass"];
 
 use Dancer;
 use Dancer::Test;
@@ -16,7 +16,7 @@ BEGIN {
       build_options_route => {
           header_allow_credentials => 'true',
           header_allow_headers => 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Cookie,X-Weborama-UserAuthToken,X-Weborama-Account_Id',
-          header_allow_allow_origins => [ 'https://testurl.com'],
+          header_allow_allow_origins => [ 'https://testurl1.com', 'https://testurl2.com'],
           header_max_age => '1728000',
       }
     },
@@ -25,6 +25,7 @@ BEGIN {
 
 use t::lib::WebService;
 
+my $response;
 my $params1  = { params => {name_object => 'test_result'} };
 my $params2  = { params => {name_object => 'test_result', created_at => '2010-10-10'} };
 my $params3  = { params => {name_object => 'test_result', created_at => '2010-10-10', test => 'test_result'} };
@@ -81,15 +82,21 @@ response_status_is ['OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 
 response_content_is ['OPTIONS' => '/object/12'], '{"status":200,"message":"OK"}', "OPTIONS route response is ok";
 response_headers_include ['OPTIONS' => '/object/12'], [ 'Access-Control-Allow-Credentials' => 'true' ];
 response_headers_include ['OPTIONS' => '/object/12'], [ 'Access-Control-Allow-Methods' => 'PUT,DELETE,GET,OPTIONS' ];
-response_headers_include ['OPTIONS' => '/object/12'], [ 'Access-Control-Allow-Origin' => '' ];
-response_headers_include ['OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 'application/x-www-form-urlencoded', 'Origin'=>'https://testurl.com' ]}], [ 'Access-Control-Allow-Origin' => 'https://testurl.com' ];
-response_headers_include ['OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 'application/x-www-form-urlencoded', 'Origin'=>'https://testurl1.com' ]}], [ 'Access-Control-Allow-Origin' => '' ];
-
+response_headers_include ['OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 'application/x-www-form-urlencoded', 'Origin'=>'https://testurl1.com' ]}], [ 'Access-Control-Allow-Origin' => 'https://testurl1.com' ];
+response_headers_include ['OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 'application/x-www-form-urlencoded', 'Origin'=>'https://testurl2.com' ]}], [ 'Access-Control-Allow-Origin' => 'https://testurl2.com' ];
+#response_headers_include ['OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 'application/x-www-form-urlencoded', 'Origin'=>'https://testurl_nope.com' ]}], [ 'Access-Control-Allow-Origin' => '' ];
+$response = dancer_response 'OPTIONS' => '/object/12', { headers => [ 'Content-Type' => 'application/x-www-form-urlencoded', 'Origin'=>'https://testurl_nope.com' ]};
+ok !$response->{headers}->{'access-control-allow-origin'}, "access-control-allow-origin is not set";
+#response_headers_include ['OPTIONS' => '/object/12'], [ 'Access-Control-Allow-Origin' => '' ];
+$response = dancer_response 'OPTIONS' => '/object/12';
+ok !$response->{headers}->{'access-control-allow-origin'}, "access-control-allow-origin is not set";
 response_headers_include ['OPTIONS' => '/object/12'], [ 'Access-Control-Max-Age' => '1728000' ];
 response_content_is ['OPTIONS' => '/anotherobject'], '{"status":200,"message":"OK"}', "OPTIONS route response is ok";
 response_headers_include ['OPTIONS' => '/anotherobject'], [ 'Access-Control-Allow-Credentials' => 'true' ];
 response_headers_include ['OPTIONS' => '/anotherobject'], [ 'Access-Control-Allow-Methods' => 'GET,POST,OPTIONS' ];
-response_headers_include ['OPTIONS' => '/anotherobject'], [ 'Access-Control-Allow-Origin' => '' ];
+#response_headers_include ['OPTIONS' => '/anotherobject'], [ 'Access-Control-Allow-Origin' => '' ];
+$response = dancer_response 'OPTIONS' => '/anotherobject';
+ok !$response->{headers}->{'access-control-allow-origin'}, "access-control-allow-origin is not set";
 response_headers_include ['OPTIONS' => '/anotherobject'], [ 'Access-Control-Max-Age' => '1728000' ];
 response_status_is ['OPTIONS' => '/anotherobject/12'], 404, "OPTIONS route pattern is not defined";
 response_status_is ['OPTIONS' => '/nimportequoi/12', $params1], 404, "OPTIONS route pattern is not defined";
