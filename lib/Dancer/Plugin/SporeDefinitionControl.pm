@@ -239,7 +239,7 @@ register 'check_spore_definition' => sub {
         
         #set the access-control-allow-credentials if needed
         my $build_options_route = plugin_setting->{'build_options_route'};
-        header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} || '';
+        header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} if defined $build_options_route->{'header_allow_credentials'};
       };
 };
 
@@ -289,7 +289,7 @@ sub _returned_options_methods
   my $build_options_route = plugin_setting->{'build_options_route'};
   if (defined $methods){
   my $req = request;
-  my $origin_allowed = "";
+  my $origin_allowed;
   #check that header contain origin and that url is permit by api
   $origin_allowed = $req->header('Origin') if (defined $req->header('Origin') 
                                                 && defined $build_options_route->{'header_allow_allow_origins'} 
@@ -301,7 +301,7 @@ sub _returned_options_methods
   header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} || '';
   header 'access-control-allow-headers' => $build_options_route->{'header_allow_headers'} || '';
   header 'access-control-allow-methods' => join(",",@unique_methods,'OPTIONS');
-  header 'access-control-allow-origin' => $origin_allowed;
+  header 'access-control-allow-origin' => $origin_allowed if defined $origin_allowed;
   header 'access-control-max-age' => $build_options_route->{'header_max_age'}  || '';
   return halt('{"status":200,"message":"OK"}');
   }
