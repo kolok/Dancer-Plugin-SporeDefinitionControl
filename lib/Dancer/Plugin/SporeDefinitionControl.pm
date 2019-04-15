@@ -239,7 +239,15 @@ register 'check_spore_definition' => sub {
         
         #set the access-control-allow-credentials if needed
         my $build_options_route = plugin_setting->{'build_options_route'};
+        my $origin_allowed;
+        #check that header contain origin and that url is permit by api
+        $origin_allowed = $req->header('Origin') if (defined $req->header('Origin') 
+                                                && defined $build_options_route->{'header_allow_allow_origins'} 
+                                                &&  $req->header('Origin') ~~ @{$build_options_route->{'header_allow_allow_origins'}}
+                                               );
+
         header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} if defined $build_options_route->{'header_allow_credentials'};
+        header 'access-control-allow-origin' => $origin_allowed if defined $origin_allowed;
       };
 };
 
