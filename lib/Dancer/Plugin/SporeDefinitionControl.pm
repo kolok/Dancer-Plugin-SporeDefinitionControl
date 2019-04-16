@@ -238,16 +238,7 @@ register 'check_spore_definition' => sub {
         return _returned_error($error,400) unless $is_ok;
         
         #set the access-control-allow-credentials if needed
-        my $build_options_route = plugin_setting->{'build_options_route'};
-        my $origin_allowed;
-        #check that header contain origin and that url is permit by api
-        $origin_allowed = $req->header('Origin') if (defined $req->header('Origin') 
-                                                && defined $build_options_route->{'header_allow_allow_origins'} 
-                                                &&  $req->header('Origin') ~~ @{$build_options_route->{'header_allow_allow_origins'}}
-                                               );
-
-        header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} if defined $build_options_route->{'header_allow_credentials'};
-        header 'access-control-allow-origin' => $origin_allowed if defined $origin_allowed;
+        _set_access_control_header($path_validation->{path}->{$req->{_route_pattern}});
       };
 };
 
@@ -289,35 +280,42 @@ sub _returned_error
   {die "Unknown code";}
 }
 
+# Format and return the options method
 sub _returned_options_methods
 {
   my $methods = shift;
-  my %seen = ();
-  my @unique_methods = grep { !$seen{$_}++ } @{$methods};
-  my $build_options_route = plugin_setting->{'build_options_route'};
   if (defined $methods){
-  my $req = request;
-  my $origin_allowed;
-  #check that header contain origin and that url is permit by api
-  $origin_allowed = $req->header('Origin') if (defined $req->header('Origin') 
-                                                && defined $build_options_route->{'header_allow_allow_origins'} 
-                                                &&  $req->header('Origin') ~~ @{$build_options_route->{'header_allow_allow_origins'}}
-                                               );
-
-  set serializer => 'JSON';
-  status 200;
-  header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} || '';
-  header 'access-control-allow-headers' => $build_options_route->{'header_allow_headers'} || '';
-  header 'access-control-allow-methods' => join(",",@unique_methods,'OPTIONS');
-  header 'access-control-allow-origin' => $origin_allowed if defined $origin_allowed;
-  header 'access-control-max-age' => $build_options_route->{'header_max_age'}  || '';
-  return halt('{"status":200,"message":"OK"}');
+    set serializer => 'JSON';
+    _set_access_control_header($methods);
+    status 200;
+    return halt('{"status":200,"message":"OK"}');
   }
   else{
       set serializer => 'JSON';
       status 404;
       return halt('{"status":404,"message":"no route exists"}');
   }
+}
+
+# Set the access control header of each request following the configuration
+sub _set_access_control_header
+{
+  my $methods = shift;
+  my $req = request;
+  my %seen = ();
+  my $build_options_route = plugin_setting->{'build_options_route'};
+  my @unique_methods = grep { !$seen{$_}++ } @{$methods};
+  my $origin_allowed;
+  #check that header contain origin and that url is permit by api
+  $origin_allowed = $req->header('Origin') if ( defined $req->header('Origin') 
+                                                  && defined $build_options_route->{'header_allow_allow_origins'} 
+                                                  &&  $req->header('Origin') ~~ @{$build_options_route->{'header_allow_allow_origins'}}
+                                                );
+  header 'access-control-allow-credentials' => $build_options_route->{'header_allow_credentials'} || '';
+  header 'access-control-allow-headers' => $build_options_route->{'header_allow_headers'} || '';
+  header 'access-control-allow-methods' => join(",",@unique_methods,'OPTIONS');
+  header 'access-control-allow-origin' => $origin_allowed if defined $origin_allowed;
+  header 'access-control-max-age' => $build_options_route->{'header_max_age'}  || '';
 }
 
 
